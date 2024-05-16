@@ -7,6 +7,10 @@ use App\Http\Controllers\Main\AuthController;
 
 Route::get('/', [MainController::class, 'main']);
 
+Route::get('/csrf-token', function() {
+    return response()->json(['csrf_token' => csrf_token()]);
+});
+
 Route::prefix('auth')->group(function () {
     Route::post('', [AuthController::class, 'store']);
     Route::post('token', [AuthController::class, 'authenticate']);
