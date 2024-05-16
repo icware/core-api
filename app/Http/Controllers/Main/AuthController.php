@@ -163,7 +163,7 @@ class AuthController extends Controller {
     public function check_token(Request $request){
         try {
             $user = JWTAuth::parseToken()->authenticate();
-            return response()->json(['succes' => 'Token OK'], 200);
+            return response()->json( $user, 200);
         } catch (\Throwable $th) {
             return response()->json(['message' => 'Erro interno do servidor', 'error'=> $th->getMessage()], Response::HTTP_INTERNAL_SERVER_ERROR);
         }}
@@ -172,7 +172,7 @@ class AuthController extends Controller {
     protected function respondWithToken($token, $additionalData) {
         return response()->json([
                     'token' => $token,
-                    'user' => $additionalData,
+                    'data' => $additionalData,
                     'type' => 'bearer',
                         ], Response::HTTP_OK);
     }
