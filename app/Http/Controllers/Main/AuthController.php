@@ -10,14 +10,13 @@ use Tymon\JWTAuth\Facades\JWTAuth;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Crypt;
 use Illuminate\Validation\ValidationException;
 
 class AuthController extends Controller {
 
     public function show() {
-        // Função para retornar os dados do usuário logado
         $user = JWTAuth::parseToken()->authenticate();
-
         return response()->json($user, Response::HTTP_OK);
     }
 
@@ -77,19 +76,31 @@ class AuthController extends Controller {
         }
     }
 
-    public function authenticate(Request $request) {
+    public function get_token(Request $request) {
         try {
             // Lógica para obter um token de acesso
         
-            $credentials = $request->only(['email', 'password']);
+            $dataRequest = $request->only(['email', 'password']);
+           
+            $pass = base64_decode($dataRequest['password']);
+            
+            $email = base64_decode($dataRequest['email']);
+            
+            $user = User::where('email', $email)->first();
 
-            $user = User::where('email', $credentials['email'])->first();
+            if (!$user) {
+                return response()->json(['error' => 'Credenciais inválidas'], Response::HTTP_UNAUTHORIZED);
+            }
 
             // Verifique se o usuário está ativo
             if (!$user->active) {
                 return response()->json(['error' => 'Usuário não está ativo'], Response::HTTP_UNAUTHORIZED);
             }
 
+            $credentials = [
+                'email' => $email,
+                'password' => $pass
+            ];
            
             // Verifique se as credenciais são válidas
             if (!Auth::validate($credentials)) {
@@ -104,7 +115,7 @@ class AuthController extends Controller {
         
             // Informações adicionais para o token
             $additionalData = [
-                'user_name' => $user->name,
+                'user' => $user
             ];
         
             // Adicione as informações adicionais ao token
@@ -112,9 +123,7 @@ class AuthController extends Controller {
         
             return $this->respondWithToken($tokenWithAdditionalData, $additionalData);
         } catch (\Throwable $th) {
-            // Aqui você pode lidar com a exceção, como registrá-la ou retornar uma resposta de erro adequada
-            return response()->json(['error' => 'Erro interno do servidor'], Response::HTTP_INTERNAL_SERVER_ERROR);
-        }
+            return response()->json(['message' => 'Erro interno do servidor', 'error'=> $th->getMessage()], Response::HTTP_INTERNAL_SERVER_ERROR);}
     }
 
     public function update_password(Request $request) {
@@ -151,11 +160,21 @@ class AuthController extends Controller {
         // Função para resetar senha do usuário
     }
 
+    public function check_token(Request $request){
+        try {
+            $user = JWTAuth::parseToken()->authenticate();
+            return response()->json(['succes' => 'Token OK'], 200);
+        } catch (\Throwable $th) {
+            return response()->json(['message' => 'Erro interno do servidor', 'error'=> $th->getMessage()], Response::HTTP_INTERNAL_SERVER_ERROR);
+        }}
+
+
     protected function respondWithToken($token, $additionalData) {
         return response()->json([
                     'token' => $token,
-                    'data' => $additionalData,
+                    'user' => $additionalData,
                     'type' => 'bearer',
                         ], Response::HTTP_OK);
     }
+
 }

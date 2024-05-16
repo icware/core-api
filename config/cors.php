@@ -15,20 +15,20 @@ return [
     |
     */
 
-    // 'paths' => ['api/*', 'sanctum/csrf-cookie'],
+    'paths' => ['/'],
 
     // 'allowed_methods' => ['GET', 'POST','PUT', 'OPTIONS', 'PATCH'],
 
-    // 'allowed_origins' => ['Content-Type', 'Authorization','Acept'],
+    'allowed_origins' => ['http://pathsdk.com.br'],
 
     // 'allowed_origins_patterns' => [],
 
-    // 'allowed_headers' => ['*'],
+    // 'allowed_headers' => ['Content-Type', 'Authorization','Acept'],
 
     // 'exposed_headers' => [],
 
-    // 'max_age' => 0,
+    'max_age' => 0,
 
-    // 'supports_credentials' => true,
+    'supports_credentials' => true,
 
 ];

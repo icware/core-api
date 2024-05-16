@@ -7,15 +7,12 @@ use App\Http\Controllers\Main\AuthController;
 
 Route::get('/', [MainController::class, 'main']);
 
-Route::get('/csrf-token', function() {
-    return response()->json(['csrf_token' => csrf_token()]);
-});
-
 Route::prefix('auth')->group(function () {
     Route::post('', [AuthController::class, 'store']);
-    Route::post('token', [AuthController::class, 'authenticate']);
+    Route::post('token', [AuthController::class, 'get_token']);
+    Route::get('token', [AuthController::class, 'check_token'])->middleware('auth.jwt');
     Route::get('', [AuthController::class, 'show'])->middleware('auth.jwt');
-    Route::put('', [AuthController::class, 'update'])->middleware('auth.jwt');
+    Route::put('update', [AuthController::class, 'update'])->middleware('auth.jwt');
     Route::put('password/{auth_id}', [AuthController::class, 'update_password'])->middleware('auth.jwt');
     Route::post('password/{auth_id}', [AuthController::class, 'reset_password'])->middleware('auth.jwt');
 });
